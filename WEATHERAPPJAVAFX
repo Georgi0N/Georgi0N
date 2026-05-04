@@ -1,1826 +1,376 @@
-package com.example.weather1;
+```java
+package com.example.weather1.demo2; 
+// hayda esm l package taba3 l project
 
-import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
-import javafx.animation.ScaleTransition;
-import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
-import javafx.util.Duration;
+import javafx.animation.*; 
+// animation (move, fade, scale...)
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javafx.application.*; 
+// تشغيل JavaFX app
 
-public class HelloApplication extends Application {
+import javafx.geometry.*; 
+// positioning (center, margin...)
 
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(java.time.Duration.ofSeconds(10))
-            .build();
+import javafx.scene.*; 
+// base UI
 
-    private Stage primaryStage;
+import javafx.scene.control.*; 
+// buttons, labels, textfield
 
-    private Scene splashScene;
-    private Scene dashboardScene;
-    private Scene detailsScene;
-    private Scene favoritesScene;
+import javafx.scene.layout.*; 
+// VBox, HBox, GridPane...
 
-    private StackPane dashboardRoot;
-    private StackPane detailsRoot;
-    private StackPane favoritesRoot;
+import javafx.scene.paint.*; 
+// colors
 
-    private BorderPane dashboardLayout;
-    private BorderPane detailsLayout;
-    private BorderPane favoritesLayout;
+import javafx.scene.shape.*; 
+// shapes (circle)
 
-    private StackPane loadingOverlay;
-    private Label loadingLabel;
+import javafx.scene.text.*; 
+// fonts
 
-    private boolean isCelsius = true;
-    private boolean darkMode = true;
+import javafx.stage.Stage; 
+// main window
 
-    private WeatherResponse currentWeatherData;
-    private String currentCityQuery = "Beirut";
+import javafx.util.Duration; 
+// time (animation duration)
 
-    private final ObservableList<String> suggestionItems = FXCollections.observableArrayList();
-    private final ObservableList<String> favoritesItems = FXCollections.observableArrayList();
-    private final ObservableList<String> historyItems = FXCollections.observableArrayList();
+import java.net.*; 
+// URL
 
-    private final Set<String> favoritesSet = new LinkedHashSet<>();
-    private final Set<String> historySet = new LinkedHashSet<>();
+import java.net.http.*; 
+// API requests
 
-    private Circle dashboardGlow1;
-    private Circle dashboardGlow2;
-    private Circle detailsGlow1;
-    private Circle detailsGlow2;
-    private Circle favoritesGlow1;
-    private Circle favoritesGlow2;
+import java.nio.charset.StandardCharsets; 
+// encoding UTF-8
 
-    // Dashboard controls
-    private Label cityLabel;
-    private Label timeLabel;
-    private Label conditionLabel;
-    private Label tempLabel;
-    private Label feelsLikeLabel;
-    private Label weatherIconLabel;
-    private Label humidityLabel;
-    private Label windLabel;
-    private Label pressureLabel;
-    private Label visibilityLabel;
-    private Label sunriseLabel;
-    private Label sunsetLabel;
-    private Label statusLabel;
-    private Label headerMiniInfoLabel;
+import java.time.LocalDate; 
+// date
 
-    private TextField searchField;
-    private ListView<String> suggestionsList;
-    private VBox forecastContainer;
-    private HBox hourlyChartBox;
-    private ProgressBar sunProgressBar;
-    private Button searchBtn;
+import java.time.format.TextStyle; 
+// day names
 
-    // Details scene controls
-    private Label detailsCityLabel;
-    private Label detailsConditionLabel;
-    private Label detailsTempLabel;
-    private Label detailsFeelsLabel;
-    private Label detailsHumidityLabel;
-    private Label detailsWindLabel;
-    private Label detailsPressureLabel;
-    private Label detailsVisibilityLabel;
-    private Label detailsSunriseLabel;
-    private Label detailsSunsetLabel;
-    private Label detailsBigIcon;
-    private VBox detailsForecastBox;
-    private HBox detailsHourlyChartBox;
+import java.util.*; 
+// lists, arrays...
 
-    // Favorites scene controls
-    private VBox favoritesCitiesBox;
-    private VBox historyBox;
-    private Label favoritesTitleLabel;
+import java.util.regex.*; 
+// regex (parsing JSON)
 
-    private Timeline clockTimeline;
+public class HelloApplication extends Application { 
+// main class taba3 l app
+
+    private final HttpClient client = HttpClient.newHttpClient(); 
+    // object la n3mel requests 3al internet
+
+    private Label city = new Label("Search City"); 
+    // label la esm l madine
+
+    private Label temp = new Label("--°C"); 
+    // label la temperature
+
+    private Label condition = new Label("-"); 
+    // label la weather description
+
+    private Label icon = new Label("☀"); 
+    // emoji lal weather
+
+    private Label humidity = stat(); 
+    // humidity
+
+    private Label wind = stat(); 
+    // wind
+
+    private Label pressure = stat(); 
+    // pressure
+
+    private Label visibility = stat(); 
+    // visibility
+
+    private TextField search = new TextField(); 
+    // search bar
+
+    private StackPane overlayLayer = new StackPane(); 
+    // layer fo2 la autocomplete
+
+    private StackPane root = new StackPane(); 
+    // main root
+
+    private double lastLat; 
+    private double lastLon; 
+    // last coordinates
+
+    private String currentCity = "Beirut"; 
+    // default city
+
+    private boolean isCelsius = true; 
+    // unit toggle
+
+    private double currentTempC = 0; 
+    // store temp
 
     @Override
-    public void start(Stage stage) {
-        this.primaryStage = stage;
+    public void start(Stage stage) { 
+    // hon byebda l app
 
-        splashScene = createSplashScene();
-        dashboardScene = createDashboardScene();
-        detailsScene = createDetailsScene();
-        favoritesScene = createFavoritesScene();
+        Pane bg = createBackground(); 
+        // background design
 
-        primaryStage.setTitle("SkyCast X Ultimate");
-        primaryStage.setScene(splashScene);
-        primaryStage.show();
+        VBox layout = new VBox(25); 
+        layout.setPadding(new Insets(40)); 
+        layout.setAlignment(Pos.TOP_CENTER); 
+        // main vertical layout
 
-        startClock();
+        styleField(search); 
+        // style search bar
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(2.3));
-        pause.setOnFinished(e -> {
-            switchScene(dashboardScene);
-            fetchWeatherForCity("Beirut");
-        });
-        pause.play();
-    }
+        search.setPromptText("Search city..."); 
+        // text jowa
 
-    // =========================================================
-    // SCENES
-    // =========================================================
+        search.setMaxWidth(420); 
+        // width
 
-    private Scene createSplashScene() {
-        StackPane root = new StackPane();
-        root.setBackground(new Background(new BackgroundFill(
-                new LinearGradient(
-                        0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
-                        new Stop(0, Color.web("#020617")),
-                        new Stop(0.5, Color.web("#1e3a8a")),
-                        new Stop(1, Color.web("#312e81"))
-                ),
-                CornerRadii.EMPTY,
-                Insets.EMPTY
-        )));
+        search.textProperty().addListener((a, b, c) -> { 
+        // lama user yekteb
 
-        Circle glow1 = new Circle(170, Color.rgb(255, 255, 255, 0.08));
-        Circle glow2 = new Circle(230, Color.rgb(255, 255, 255, 0.05));
-        glow1.setTranslateX(-300);
-        glow1.setTranslateY(-180);
-        glow2.setTranslateX(300);
-        glow2.setTranslateY(180);
-
-        VBox box = new VBox(18);
-        box.setAlignment(Pos.CENTER);
-
-        Label title = new Label("SkyCast X Ultimate");
-        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 42));
-        title.setTextFill(Color.WHITE);
-
-        Label subtitle = new Label("Connecting to satellite weather network...");
-        subtitle.setFont(Font.font("Arial", 18));
-        subtitle.setTextFill(Color.web("#dbeafe"));
-
-        Label tiny = new Label("Version 3 • Multi Scene • Real API • Autocomplete");
-        tiny.setFont(Font.font("Arial", 13));
-        tiny.setTextFill(Color.web("#93c5fd"));
-
-        ProgressBar bar = new ProgressBar();
-        bar.setPrefWidth(300);
-        bar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
-
-        Button enterBtn = modernButton("Enter Dashboard");
-        enterBtn.setOnAction(e -> {
-            switchScene(dashboardScene);
-            if (currentWeatherData == null) {
-                fetchWeatherForCity("Beirut");
-            }
-        });
-
-        box.getChildren().addAll(title, subtitle, tiny, bar, enterBtn);
-
-        root.getChildren().addAll(glow1, glow2, box);
-
-        TranslateTransition t1 = new TranslateTransition(Duration.seconds(7), glow1);
-        t1.setFromX(-300);
-        t1.setToX(-200);
-        t1.setAutoReverse(true);
-        t1.setCycleCount(Animation.INDEFINITE);
-
-        TranslateTransition t2 = new TranslateTransition(Duration.seconds(8), glow2);
-        t2.setFromX(300);
-        t2.setToX(200);
-        t2.setAutoReverse(true);
-        t2.setCycleCount(Animation.INDEFINITE);
-
-        FadeTransition fade = new FadeTransition(Duration.seconds(1.8), box);
-        fade.setFromValue(0.3);
-        fade.setToValue(1);
-        fade.setAutoReverse(true);
-        fade.setCycleCount(Animation.INDEFINITE);
-
-        t1.play();
-        t2.play();
-        fade.play();
-
-        return new Scene(root, 1450, 900);
-    }
-
-    private Scene createDashboardScene() {
-        dashboardRoot = new StackPane();
-        dashboardLayout = new BorderPane();
-        dashboardLayout.setPadding(new Insets(20));
-
-        VBox left = createDashboardLeftSidebar();
-        VBox center = createDashboardCenterPanel();
-        VBox right = createDashboardRightPanel();
-
-        bindDashboardPanels(left, center, right);
-
-        dashboardLayout.setLeft(left);
-        dashboardLayout.setCenter(center);
-        dashboardLayout.setRight(right);
-
-        BorderPane.setMargin(left, new Insets(0, 15, 0, 0));
-        BorderPane.setMargin(center, new Insets(0, 15, 0, 15));
-        BorderPane.setMargin(right, new Insets(0, 0, 0, 15));
-
-        loadingOverlay = createLoadingOverlay();
-
-        updateSceneBackground(dashboardRoot, dashboardLayout, "clear sky", SceneType.DASHBOARD);
-        dashboardRoot.getChildren().add(loadingOverlay);
-
-        Scene scene = new Scene(dashboardRoot, 1450, 900);
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.F1) switchScene(detailsScene);
-            if (e.getCode() == KeyCode.F2) switchScene(favoritesScene);
-            if (e.getCode() == KeyCode.ESCAPE) switchScene(dashboardScene);
-        });
-        return scene;
-    }
-
-    private Scene createDetailsScene() {
-        detailsRoot = new StackPane();
-        detailsLayout = new BorderPane();
-        detailsLayout.setPadding(new Insets(18));
-
-        HBox topBar = new HBox(12);
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.setPadding(new Insets(0, 0, 15, 0));
-
-        Button backBtn = modernButton("Back to Dashboard");
-        backBtn.setOnAction(e -> switchScene(dashboardScene));
-
-        Button favoritesBtn = modernButton("Open Favorites");
-        favoritesBtn.setOnAction(e -> {
-            refreshFavoritesScene();
-            switchScene(favoritesScene);
-        });
-
-        Label sceneTitle = new Label("Detailed Weather View");
-        sceneTitle.setTextFill(Color.WHITE);
-        sceneTitle.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        topBar.getChildren().addAll(backBtn, favoritesBtn, spacer, sceneTitle);
-        detailsLayout.setTop(topBar);
-
-        VBox mainBox = glassBox(0);
-        mainBox.setSpacing(18);
-        mainBox.setAlignment(Pos.TOP_CENTER);
-        mainBox.setMaxWidth(1100);
-        mainBox.setFillWidth(true);
-
-        detailsCityLabel = new Label("No City Loaded");
-        detailsCityLabel.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 40));
-        detailsCityLabel.setTextFill(Color.WHITE);
-        detailsCityLabel.setWrapText(true);
-
-        detailsBigIcon = new Label("☀");
-        detailsBigIcon.setFont(Font.font("Arial", 100));
-
-        detailsConditionLabel = new Label("Condition");
-        detailsConditionLabel.setTextFill(Color.web("#fde68a"));
-        detailsConditionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 26));
-
-        detailsTempLabel = new Label("--°C");
-        detailsTempLabel.setTextFill(Color.WHITE);
-        detailsTempLabel.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 64));
-
-        detailsFeelsLabel = new Label("Feels like --");
-        detailsFeelsLabel.setTextFill(Color.web("#dbeafe"));
-        detailsFeelsLabel.setFont(Font.font("Arial", 18));
-
-        VBox heroText = new VBox(8, detailsConditionLabel, detailsTempLabel, detailsFeelsLabel);
-        heroText.setAlignment(Pos.CENTER_LEFT);
-
-        HBox hero = new HBox(25, detailsBigIcon, heroText);
-        hero.setAlignment(Pos.CENTER);
-        hero.setMaxWidth(Double.MAX_VALUE);
-
-        GridPane statsGrid = new GridPane();
-        statsGrid.setHgap(14);
-        statsGrid.setVgap(14);
-        statsGrid.setAlignment(Pos.CENTER);
-        statsGrid.setMaxWidth(Double.MAX_VALUE);
-
-        detailsHumidityLabel = detailValueLabel();
-        detailsWindLabel = detailValueLabel();
-        detailsPressureLabel = detailValueLabel();
-        detailsVisibilityLabel = detailValueLabel();
-        detailsSunriseLabel = detailValueLabel();
-        detailsSunsetLabel = detailValueLabel();
-
-        statsGrid.add(detailCard("Humidity", detailsHumidityLabel), 0, 0);
-        statsGrid.add(detailCard("Wind", detailsWindLabel), 1, 0);
-        statsGrid.add(detailCard("Pressure", detailsPressureLabel), 2, 0);
-        statsGrid.add(detailCard("Visibility", detailsVisibilityLabel), 0, 1);
-        statsGrid.add(detailCard("Sunrise", detailsSunriseLabel), 1, 1);
-        statsGrid.add(detailCard("Sunset", detailsSunsetLabel), 2, 1);
-
-        Label hourlyTitle = new Label("Expanded Hourly Forecast");
-        hourlyTitle.setTextFill(Color.WHITE);
-        hourlyTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-
-        detailsHourlyChartBox = new HBox(14);
-        detailsHourlyChartBox.setAlignment(Pos.CENTER);
-        detailsHourlyChartBox.setFillHeight(true);
-
-        VBox hourlyWrapper = new VBox(12, hourlyTitle, detailsHourlyChartBox);
-        hourlyWrapper.setAlignment(Pos.CENTER);
-        hourlyWrapper.setPadding(new Insets(16));
-        hourlyWrapper.setMaxWidth(Double.MAX_VALUE);
-        hourlyWrapper.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.08);" +
-                        "-fx-background-radius: 18;"
-        );
-
-        Label forecastTitle = new Label("Forecast Breakdown");
-        forecastTitle.setTextFill(Color.WHITE);
-        forecastTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-
-        detailsForecastBox = new VBox(10);
-        detailsForecastBox.setAlignment(Pos.CENTER);
-        detailsForecastBox.setMaxWidth(Double.MAX_VALUE);
-
-        mainBox.getChildren().addAll(
-                detailsCityLabel,
-                hero,
-                statsGrid,
-                hourlyWrapper,
-                forecastTitle,
-                detailsForecastBox
-        );
-
-        VBox centerWrapper = new VBox(mainBox);
-        centerWrapper.setAlignment(Pos.TOP_CENTER);
-        centerWrapper.setPadding(new Insets(0, 0, 10, 0));
-
-        detailsLayout.setCenter(makeResponsiveScroll(centerWrapper));
-
-        updateSceneBackground(detailsRoot, detailsLayout, "clear sky", SceneType.DETAILS);
-        return new Scene(detailsRoot, 1450, 900);
-    }
-
-    private Scene createFavoritesScene() {
-        favoritesRoot = new StackPane();
-        favoritesLayout = new BorderPane();
-        favoritesLayout.setPadding(new Insets(18));
-
-        HBox topBar = new HBox(12);
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.setPadding(new Insets(0, 0, 15, 0));
-
-        Button backBtn = modernButton("Back to Dashboard");
-        backBtn.setOnAction(e -> switchScene(dashboardScene));
-
-        Button detailsBtn = modernButton("Open Details");
-        detailsBtn.setOnAction(e -> switchScene(detailsScene));
-
-        favoritesTitleLabel = new Label("Favorites & Search History");
-        favoritesTitleLabel.setTextFill(Color.WHITE);
-        favoritesTitleLabel.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 30));
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        topBar.getChildren().addAll(backBtn, detailsBtn, spacer, favoritesTitleLabel);
-        favoritesLayout.setTop(topBar);
-
-        HBox content = new HBox(18);
-        content.setAlignment(Pos.TOP_CENTER);
-        content.setMaxWidth(1200);
-
-        VBox favoritesCard = glassBox(0);
-        favoritesCard.setSpacing(16);
-        favoritesCard.setAlignment(Pos.TOP_CENTER);
-        favoritesCard.setFillWidth(true);
-        HBox.setHgrow(favoritesCard, Priority.ALWAYS);
-
-        Label favTitle = new Label("Favorite Cities");
-        favTitle.setTextFill(Color.WHITE);
-        favTitle.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-
-        favoritesCitiesBox = new VBox(10);
-        favoritesCitiesBox.setAlignment(Pos.TOP_CENTER);
-        favoritesCitiesBox.setMaxWidth(Double.MAX_VALUE);
-
-        VBox historyCard = glassBox(0);
-        historyCard.setSpacing(16);
-        historyCard.setAlignment(Pos.TOP_CENTER);
-        historyCard.setFillWidth(true);
-        HBox.setHgrow(historyCard, Priority.ALWAYS);
-
-        Label histTitle = new Label("Recent Searches");
-        histTitle.setTextFill(Color.WHITE);
-        histTitle.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-
-        historyBox = new VBox(10);
-        historyBox.setAlignment(Pos.TOP_CENTER);
-        historyBox.setMaxWidth(Double.MAX_VALUE);
-
-        favoritesCard.getChildren().addAll(favTitle, favoritesCitiesBox);
-        historyCard.getChildren().addAll(histTitle, historyBox);
-
-        content.getChildren().addAll(favoritesCard, historyCard);
-
-        VBox centerWrapper = new VBox(content);
-        centerWrapper.setAlignment(Pos.TOP_CENTER);
-        centerWrapper.setPadding(new Insets(0, 0, 10, 0));
-
-        favoritesLayout.setCenter(makeResponsiveScroll(centerWrapper));
-
-        updateSceneBackground(favoritesRoot, favoritesLayout, "clear sky", SceneType.FAVORITES);
-        return new Scene(favoritesRoot, 1450, 900);
-    }
-
-    // =========================================================
-    // DASHBOARD BUILDERS
-    // =========================================================
-
-    private VBox createDashboardLeftSidebar() {
-        VBox box = glassBox(280);
-        box.setSpacing(14);
-        box.setAlignment(Pos.TOP_CENTER);
-        box.setFillWidth(true);
-
-        Label title = new Label("SkyCast X");
-        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 28));
-        title.setTextFill(Color.WHITE);
-
-        Label subtitle = new Label("Real API Weather • Autocomplete");
-        subtitle.setTextFill(Color.web("#dbeafe"));
-
-        searchField = new TextField();
-        searchField.setPromptText("Type city name...");
-        styleTextField(searchField);
-        searchField.setMaxWidth(Double.MAX_VALUE);
-
-        suggestionsList = new ListView<>(suggestionItems);
-        suggestionsList.setPrefHeight(150);
-        suggestionsList.setMaxHeight(150);
-        suggestionsList.setMaxWidth(Double.MAX_VALUE);
-        suggestionsList.setStyle(
-                "-fx-background-color: rgba(15,23,42,0.70);" +
-                        "-fx-control-inner-background: rgba(15,23,42,0.85);" +
-                        "-fx-background-radius: 14;" +
-                        "-fx-border-radius: 14;" +
-                        "-fx-border-color: rgba(255,255,255,0.18);" +
-                        "-fx-text-fill: white;"
-        );
-        suggestionsList.setVisible(false);
-        suggestionsList.setManaged(false);
-
-        suggestionsList.setOnMouseClicked(e -> {
-            String selected = suggestionsList.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                String city = selected.contains(" | ") ? selected.substring(0, selected.indexOf(" | ")) : selected;
-                searchField.setText(city);
-                hideSuggestions();
-                fetchWeatherForCity(city);
-            }
-        });
-
-        searchField.textProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == null || newValue.trim().length() < 2) {
-                hideSuggestions();
+            if (c.length() > 1) {
+                fetchSuggestions(c); 
+                // jib autocomplete
             } else {
-                fetchSuggestions(newValue.trim());
+                overlayLayer.getChildren().clear(); 
+                // clear suggestions
             }
         });
 
-        searchField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.DOWN && suggestionsList.isVisible()) {
-                suggestionsList.requestFocus();
-                suggestionsList.getSelectionModel().selectFirst();
+        search.setOnAction(e -> fetchWeather(search.getText())); 
+        // lama ykbas enter
+
+        VBox hero = glass(); 
+        hero.setAlignment(Pos.CENTER); 
+        // main weather box
+
+        city.setFont(Font.font("Segoe UI", FontWeight.BOLD, 34)); 
+        city.setTextFill(Color.WHITE); 
+
+        icon.setFont(Font.font(90)); 
+        floatAnim(icon); 
+        // animation
+
+        temp.setFont(Font.font("Segoe UI", FontWeight.EXTRA_BOLD, 70)); 
+        temp.setTextFill(Color.WHITE); 
+
+        condition.setTextFill(Color.web("#cbd5f5")); 
+        condition.setFont(Font.font(18)); 
+
+        hero.getChildren().addAll(city, icon, temp, condition); 
+
+        GridPane stats = new GridPane(); 
+        stats.setHgap(15); 
+        stats.setVgap(15); 
+        stats.setAlignment(Pos.CENTER); 
+
+        stats.add(card("Humidity", humidity), 0, 0); 
+        stats.add(card("Wind", wind), 1, 0); 
+        stats.add(card("Pressure", pressure), 0, 1); 
+        stats.add(card("Visibility", visibility), 1, 1); 
+
+        VBox statsBox = glass(); 
+        statsBox.getChildren().add(stats); 
+
+        Button more = new Button("View More"); 
+        styleButton(more); 
+        more.setOnAction(e -> openForecastScene(stage)); 
+        // open second screen
+
+        Button unitButton = new Button("°C / °F"); 
+        styleButton(unitButton); 
+
+        unitButton.setOnAction(e -> { 
+        // switch unit
+
+            isCelsius = !isCelsius; 
+
+            if (isCelsius) {
+                temp.setText(String.format("%.1f°C", currentTempC)); 
+            } else {
+                double f = (currentTempC * 9 / 5) + 32; 
+                temp.setText(String.format("%.1f°F", f));
             }
-            if (e.getCode() == KeyCode.ENTER) {
-                if (suggestionsList.isVisible() && suggestionsList.getSelectionModel().getSelectedItem() != null) {
-                    String selected = suggestionsList.getSelectionModel().getSelectedItem();
-                    String city = selected.contains(" | ") ? selected.substring(0, selected.indexOf(" | ")) : selected;
-                    searchField.setText(city);
-                    hideSuggestions();
-                    fetchWeatherForCity(city);
-                } else {
-                    fetchWeatherForSearch();
-                }
-            }
         });
 
-        suggestionsList.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) {
-                String selected = suggestionsList.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    String city = selected.contains(" | ") ? selected.substring(0, selected.indexOf(" | ")) : selected;
-                    searchField.setText(city);
-                    hideSuggestions();
-                    fetchWeatherForCity(city);
-                }
-            }
-        });
+        HBox buttons = new HBox(15, more, unitButton); 
+        buttons.setAlignment(Pos.CENTER); 
 
-        searchBtn = modernButton("Search City");
-        searchBtn.setOnAction(e -> fetchWeatherForSearch());
+        Label signature = new Label("Crafted by Georgio Nehme ✨"); 
+        // signature
 
-        Button beirutBtn = modernButton("Beirut");
-        beirutBtn.setOnAction(e -> fetchWeatherForCity("Beirut"));
+        FadeTransition glow = new FadeTransition(Duration.seconds(2), signature); 
+        glow.setFromValue(0.45); 
+        glow.setToValue(1); 
+        glow.setCycleCount(Animation.INDEFINITE); 
+        glow.setAutoReverse(true); 
+        glow.play(); 
+        // glowing animation
 
-        Button parisBtn = modernButton("Paris");
-        parisBtn.setOnAction(e -> fetchWeatherForCity("Paris"));
+        layout.getChildren().addAll(search, hero, statsBox, buttons, signature); 
 
-        Button tokyoBtn = modernButton("Tokyo");
-        tokyoBtn.setOnAction(e -> fetchWeatherForCity("Tokyo"));
+        root.getChildren().addAll(bg, layout, overlayLayer); 
 
-        Button londonBtn = modernButton("London");
-        londonBtn.setOnAction(e -> fetchWeatherForCity("London"));
+        Scene scene = new Scene(root, 850, 900); 
 
-        Button addFavoriteBtn = modernButton("Add to Favorites");
-        addFavoriteBtn.setOnAction(e -> addCurrentCityToFavorites());
+        stage.setTitle("Weather Final Boss"); 
+        stage.setScene(scene); 
+        stage.show(); 
 
-        Button refreshBtn = modernButton("Refresh Weather");
-        refreshBtn.setOnAction(e -> {
-            if (!currentCityQuery.isBlank()) fetchWeatherForCity(currentCityQuery);
-        });
-
-        Button detailsBtn = modernButton("Open Details Scene");
-        detailsBtn.setOnAction(e -> switchScene(detailsScene));
-
-        Button favoritesBtn = modernButton("Favorites Scene");
-        favoritesBtn.setOnAction(e -> {
-            refreshFavoritesScene();
-            switchScene(favoritesScene);
-        });
-
-        Button splashBtn = modernButton("Back to Splash");
-        splashBtn.setOnAction(e -> switchScene(splashScene));
-
-        makeButtonFullWidth(searchBtn);
-        makeButtonFullWidth(beirutBtn);
-        makeButtonFullWidth(parisBtn);
-        makeButtonFullWidth(tokyoBtn);
-        makeButtonFullWidth(londonBtn);
-        makeButtonFullWidth(addFavoriteBtn);
-        makeButtonFullWidth(refreshBtn);
-        makeButtonFullWidth(detailsBtn);
-        makeButtonFullWidth(favoritesBtn);
-        makeButtonFullWidth(splashBtn);
-
-        statusLabel = new Label("Ready");
-        statusLabel.setWrapText(true);
-        statusLabel.setTextFill(Color.web("#fde68a"));
-        statusLabel.setFont(Font.font("Arial", 13));
-
-        Label attribution = new Label("Weather data: Open-Meteo");
-        attribution.setTextFill(Color.web("#bfdbfe"));
-        attribution.setFont(Font.font("Arial", 12));
-
-        box.getChildren().addAll(
-                title, subtitle,
-                searchField, suggestionsList, searchBtn,
-                beirutBtn, parisBtn, tokyoBtn, londonBtn,
-                addFavoriteBtn, refreshBtn,
-                detailsBtn, favoritesBtn, splashBtn,
-                statusLabel, attribution
-        );
-
-        return box;
+        fetchWeather("Beirut"); 
+        // load default
     }
 
-    private VBox createDashboardCenterPanel() {
-        VBox box = glassBox(700);
-        box.setSpacing(18);
-        box.setAlignment(Pos.TOP_CENTER);
-        box.setMaxWidth(Double.MAX_VALUE);
+    // ===== AUTOCOMPLETE =====
 
-        cityLabel = new Label("Loading...");
-        cityLabel.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 40));
-        cityLabel.setTextFill(Color.WHITE);
+    private void fetchSuggestions(String q) {
+        new Thread(() -> { 
+        // thread la ma ylag UI
 
-        timeLabel = new Label("Local time");
-        timeLabel.setFont(Font.font("Consolas", 17));
-        timeLabel.setTextFill(Color.web("#dbeafe"));
-
-        headerMiniInfoLabel = new Label("Live weather intelligence panel");
-        headerMiniInfoLabel.setTextFill(Color.web("#93c5fd"));
-        headerMiniInfoLabel.setFont(Font.font("Arial", 14));
-
-        weatherIconLabel = new Label("☀");
-        weatherIconLabel.setFont(Font.font("Arial", 100));
-        animateWeatherIcon(weatherIconLabel);
-
-        conditionLabel = new Label("Condition");
-        conditionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        conditionLabel.setTextFill(Color.web("#fde68a"));
-
-        tempLabel = new Label("--°C");
-        tempLabel.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 64));
-        tempLabel.setTextFill(Color.WHITE);
-
-        feelsLikeLabel = new Label("Waiting for live data");
-        feelsLikeLabel.setTextFill(Color.web("#dbeafe"));
-        feelsLikeLabel.setFont(Font.font("Arial", 17));
-
-        VBox infoBox = new VBox(8, conditionLabel, tempLabel, feelsLikeLabel);
-        infoBox.setAlignment(Pos.CENTER_LEFT);
-
-        HBox top = new HBox(22, weatherIconLabel, infoBox);
-        top.setAlignment(Pos.CENTER);
-
-        Label hourlyTitle = new Label("Hourly Forecast");
-        hourlyTitle.setTextFill(Color.WHITE);
-        hourlyTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-
-        hourlyChartBox = new HBox(12);
-        hourlyChartBox.setAlignment(Pos.CENTER);
-
-        VBox hourlyWrapper = new VBox(10, hourlyTitle, hourlyChartBox);
-        hourlyWrapper.setAlignment(Pos.CENTER);
-        hourlyWrapper.setPadding(new Insets(12));
-        hourlyWrapper.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.08);" +
-                        "-fx-background-radius: 18;"
-        );
-
-        box.getChildren().addAll(cityLabel, timeLabel, headerMiniInfoLabel, top, hourlyWrapper);
-        return box;
-    }
-
-    private VBox createDashboardRightPanel() {
-        VBox box = glassBox(380);
-        box.setSpacing(18);
-        box.setAlignment(Pos.TOP_CENTER);
-        box.setMaxWidth(Double.MAX_VALUE);
-
-        Label detailsTitle = new Label("Weather Details");
-        detailsTitle.setTextFill(Color.WHITE);
-        detailsTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-
-        humidityLabel = detailValueLabel();
-        windLabel = detailValueLabel();
-        pressureLabel = detailValueLabel();
-        visibilityLabel = detailValueLabel();
-
-        GridPane grid = new GridPane();
-        grid.setHgap(12);
-        grid.setVgap(12);
-        grid.setAlignment(Pos.CENTER);
-
-        grid.add(detailCard("Humidity", humidityLabel), 0, 0);
-        grid.add(detailCard("Wind", windLabel), 1, 0);
-        grid.add(detailCard("Pressure", pressureLabel), 0, 1);
-        grid.add(detailCard("Visibility", visibilityLabel), 1, 1);
-
-        Label sunTitle = new Label("Sunrise / Sunset");
-        sunTitle.setTextFill(Color.WHITE);
-        sunTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-
-        sunriseLabel = new Label("Sunrise: --");
-        sunsetLabel = new Label("Sunset: --");
-        sunriseLabel.setTextFill(Color.web("#fde68a"));
-        sunsetLabel.setTextFill(Color.web("#fb7185"));
-
-        sunProgressBar = new ProgressBar(0.5);
-        sunProgressBar.setPrefWidth(280);
-        sunProgressBar.setStyle("-fx-accent: #f59e0b;");
-
-        VBox sunBox = new VBox(8, sunriseLabel, sunProgressBar, sunsetLabel);
-        sunBox.setAlignment(Pos.CENTER);
-        sunBox.setPadding(new Insets(12));
-        sunBox.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.08);" +
-                        "-fx-background-radius: 18;"
-        );
-
-        Label forecastTitle = new Label("5-Day Forecast");
-        forecastTitle.setTextFill(Color.WHITE);
-        forecastTitle.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-
-        forecastContainer = new VBox(10);
-        forecastContainer.setAlignment(Pos.CENTER);
-        forecastContainer.setMaxWidth(Double.MAX_VALUE);
-
-        HBox toggleRow = new HBox(10);
-        toggleRow.setAlignment(Pos.CENTER);
-
-        Button unitBtn = modernButtonSmall("°C / °F");
-        unitBtn.setOnAction(e -> {
-            isCelsius = !isCelsius;
-            refreshAllWeatherViews();
-        });
-
-        Button themeBtn = modernButtonSmall("Dark / Light");
-        themeBtn.setOnAction(e -> {
-            darkMode = !darkMode;
-            refreshSceneBackgrounds();
-        });
-
-        toggleRow.getChildren().addAll(unitBtn, themeBtn);
-
-        box.getChildren().addAll(detailsTitle, grid, sunTitle, sunBox, toggleRow, forecastTitle, forecastContainer);
-        return box;
-    }
-
-    // =========================================================
-    // FETCH / AUTOCOMPLETE
-    // =========================================================
-
-    private void fetchWeatherForSearch() {
-        String city = searchField.getText().trim();
-        if (city.isEmpty()) return;
-        hideSuggestions();
-        fetchWeatherForCity(city);
-    }
-
-    private void fetchSuggestions(String query) {
-        Thread thread = new Thread(() -> {
             try {
-                List<String> suggestions = geocodeSuggestions(query);
-                Platform.runLater(() -> showSuggestions(suggestions));
+                String url = "https://geocoding-api.open-meteo.com/v1/search?name="
+                        + URLEncoder.encode(q, StandardCharsets.UTF_8); 
+
+                String json = client.send(
+                        HttpRequest.newBuilder().uri(URI.create(url)).build(),
+                        HttpResponse.BodyHandlers.ofString()
+                ).body(); 
+
+                List<String> list = new ArrayList<>(); 
+
+                Matcher m = Pattern.compile("\"name\":\"(.*?)\".*?\"country\":\"(.*?)\"")
+                        .matcher(json); 
+
+                while (m.find()) {
+                    String value = m.group(1) + ", " + m.group(2); 
+                    if (!list.contains(value)) list.add(value); 
+                }
+
+                Platform.runLater(() -> showSuggestions(list)); 
+
             } catch (Exception e) {
-                Platform.runLater(this::hideSuggestions);
+                e.printStackTrace(); 
             }
-        });
-        thread.setDaemon(true);
-        thread.start();
+
+        }).start();
     }
 
-    private void fetchWeatherForCity(String city) {
-        currentCityQuery = city;
-        setLoadingState(true, "Searching city and fetching live weather...");
+    private void showSuggestions(List<String> list) {
+        VBox box = new VBox(5); 
 
-        Thread thread = new Thread(() -> {
-            try {
-                GeoLocation location = geocodeCity(city);
-                if (location == null) {
-                    Platform.runLater(() -> {
-                        setLoadingState(false, "City not found.");
-                        showInfo("City Not Found", "The city could not be found.");
-                    });
-                    return;
-                }
+        for (int i = 0; i < Math.min(5, list.size()); i++) {
 
-                WeatherResponse data = fetchWeather(location);
+            String s = list.get(i); 
 
-                Platform.runLater(() -> {
-                    currentWeatherData = data;
-                    updateUIFromWeather(data);
-                    addToHistory(data.cityDisplay);
-                    setLoadingState(false, "Live weather loaded for " + data.cityDisplay);
-                    searchField.clear();
-                    hideSuggestions();
-                });
+            Label item = new Label(s); 
 
-            } catch (Exception ex) {
-                Platform.runLater(() -> {
-                    setLoadingState(false, "Error loading data.");
-                    showInfo("API Error", "Could not load weather.\n\n" + ex.getMessage());
-                });
-            }
-        });
-
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    private GeoLocation geocodeCity(String city) throws IOException, InterruptedException {
-        String encoded = URLEncoder.encode(city, StandardCharsets.UTF_8);
-        String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encoded + "&count=1&language=en&format=json";
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(java.time.Duration.ofSeconds(15))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        String json = response.body();
-
-        if (!json.contains("\"results\"")) return null;
-
-        String firstObject = extractFirstResultObject(json);
-        if (firstObject.isEmpty()) return null;
-
-        String name = extractString(firstObject, "name");
-        String country = extractString(firstObject, "country");
-        double latitude = extractDouble(firstObject, "latitude");
-        double longitude = extractDouble(firstObject, "longitude");
-        String timezone = extractString(firstObject, "timezone");
-
-        if (name == null || timezone == null) return null;
-
-        return new GeoLocation(name, country, latitude, longitude, timezone);
-    }
-
-    private List<String> geocodeSuggestions(String city) throws IOException, InterruptedException {
-        String encoded = URLEncoder.encode(city, StandardCharsets.UTF_8);
-        String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encoded + "&count=6&language=en&format=json";
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(java.time.Duration.ofSeconds(12))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        String json = response.body();
-
-        List<String> result = new ArrayList<>();
-        if (!json.contains("\"results\"")) return result;
-
-        String array = extractArrayRaw(json, "results");
-        if (array.isEmpty()) return result;
-
-        List<String> objects = splitTopLevelObjects(array);
-        for (String obj : objects) {
-            String name = extractString(obj, "name");
-            String country = extractString(obj, "country");
-            String admin1 = extractString(obj, "admin1");
-
-            if (name != null) {
-                String text = name;
-                if (admin1 != null && !admin1.isBlank()) text += " | " + admin1;
-                if (country != null && !country.isBlank()) text += " | " + country;
-                result.add(text);
-            }
-        }
-
-        return result;
-    }
-
-    private WeatherResponse fetchWeather(GeoLocation loc) throws IOException, InterruptedException {
-        String url =
-                "https://api.open-meteo.com/v1/forecast" +
-                        "?latitude=" + loc.latitude +
-                        "&longitude=" + loc.longitude +
-                        "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,surface_pressure,wind_speed_10m,visibility" +
-                        "&hourly=temperature_2m,weather_code" +
-                        "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset" +
-                        "&forecast_days=5" +
-                        "&timezone=" + URLEncoder.encode(loc.timezone, StandardCharsets.UTF_8);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(java.time.Duration.ofSeconds(15))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        String json = response.body();
-
-        WeatherResponse w = new WeatherResponse();
-        w.cityDisplay = loc.name + (loc.country != null ? ", " + loc.country : "");
-        w.originalCityName = loc.name;
-
-        w.temperatureC = extractDoubleFromObject(json, "current", "temperature_2m");
-        w.humidity = (int) extractDoubleFromObject(json, "current", "relative_humidity_2m");
-        w.feelsLikeC = extractDoubleFromObject(json, "current", "apparent_temperature");
-        w.weatherCode = (int) extractDoubleFromObject(json, "current", "weather_code");
-        w.pressure = extractDoubleFromObject(json, "current", "surface_pressure");
-        w.wind = extractDoubleFromObject(json, "current", "wind_speed_10m");
-        w.visibilityKm = extractDoubleFromObject(json, "current", "visibility") / 1000.0;
-
-        w.conditionText = weatherText(w.weatherCode);
-        w.icon = weatherIcon(w.weatherCode);
-
-        List<String> dailyTimes = extractStringArrayFromObject(json, "daily", "time");
-        List<Double> dailyMax = extractNumberArrayFromObject(json, "daily", "temperature_2m_max");
-        List<Double> dailyMin = extractNumberArrayFromObject(json, "daily", "temperature_2m_min");
-        List<Double> dailyCodes = extractNumberArrayFromObject(json, "daily", "weather_code");
-        List<String> sunrises = extractStringArrayFromObject(json, "daily", "sunrise");
-        List<String> sunsets = extractStringArrayFromObject(json, "daily", "sunset");
-
-        if (!sunrises.isEmpty()) w.sunrise = shortTime(sunrises.get(0));
-        if (!sunsets.isEmpty()) w.sunset = shortTime(sunsets.get(0));
-
-        w.forecast = new ArrayList<>();
-        for (int i = 0; i < Math.min(5, dailyTimes.size()); i++) {
-            ForecastDay day = new ForecastDay();
-            day.day = shortDay(dailyTimes.get(i));
-            int code = dailyCodes.get(i).intValue();
-            day.condition = weatherText(code);
-            day.icon = weatherIcon(code);
-            day.maxC = dailyMax.get(i);
-            day.minC = dailyMin.get(i);
-            w.forecast.add(day);
-        }
-
-        List<String> hourlyTimes = extractStringArrayFromObject(json, "hourly", "time");
-        List<Double> hourlyTemps = extractNumberArrayFromObject(json, "hourly", "temperature_2m");
-
-        w.hourly = new ArrayList<>();
-        for (int i = 0; i < Math.min(10, hourlyTemps.size()); i++) {
-            HourData h = new HourData();
-            h.hour = shortHour(hourlyTimes.get(i));
-            h.tempC = hourlyTemps.get(i);
-            w.hourly.add(h);
-        }
-
-        return w;
-    }
-
-    // =========================================================
-    // UI UPDATE
-    // =========================================================
-
-    private void updateUIFromWeather(WeatherResponse w) {
-        updateDashboardFromWeather(w);
-        updateDetailsFromWeather(w);
-        refreshFavoritesScene();
-        refreshSceneBackgrounds();
-    }
-
-    private void updateDashboardFromWeather(WeatherResponse w) {
-        cityLabel.setText(w.cityDisplay);
-        conditionLabel.setText(w.conditionText);
-        weatherIconLabel.setText(w.icon);
-        tempLabel.setText(formatTemp(w.temperatureC));
-        feelsLikeLabel.setText("Feels like " + formatTemp(w.feelsLikeC));
-
-        humidityLabel.setText(w.humidity + "%");
-        windLabel.setText(String.format(Locale.US, "%.1f km/h", w.wind));
-        pressureLabel.setText(String.format(Locale.US, "%.0f hPa", w.pressure));
-        visibilityLabel.setText(String.format(Locale.US, "%.1f km", w.visibilityKm));
-
-        sunriseLabel.setText("Sunrise: " + w.sunrise);
-        sunsetLabel.setText("Sunset: " + w.sunset);
-        sunProgressBar.setProgress(calculateDayProgress(w.sunrise, w.sunset));
-
-        headerMiniInfoLabel.setText("Satellite lock: ACTIVE • Condition profile: " + w.conditionText.toUpperCase(Locale.ROOT));
-
-        updateConditionColor(w.conditionText);
-        rebuildHourlyChartDashboard();
-        rebuildForecastDashboard();
-    }
-
-    private void updateDetailsFromWeather(WeatherResponse w) {
-        detailsCityLabel.setText(w.cityDisplay);
-        detailsBigIcon.setText(w.icon);
-        detailsConditionLabel.setText(w.conditionText);
-        detailsTempLabel.setText(formatTemp(w.temperatureC));
-        detailsFeelsLabel.setText("Feels like " + formatTemp(w.feelsLikeC));
-
-        detailsHumidityLabel.setText(w.humidity + "%");
-        detailsWindLabel.setText(String.format(Locale.US, "%.1f km/h", w.wind));
-        detailsPressureLabel.setText(String.format(Locale.US, "%.0f hPa", w.pressure));
-        detailsVisibilityLabel.setText(String.format(Locale.US, "%.1f km", w.visibilityKm));
-        detailsSunriseLabel.setText(w.sunrise);
-        detailsSunsetLabel.setText(w.sunset);
-
-        rebuildHourlyChartDetails();
-        rebuildForecastDetails();
-    }
-
-    private void refreshAllWeatherViews() {
-        if (currentWeatherData == null) return;
-        updateDashboardFromWeather(currentWeatherData);
-        updateDetailsFromWeather(currentWeatherData);
-    }
-
-    private void rebuildHourlyChartDashboard() {
-        hourlyChartBox.getChildren().clear();
-        if (currentWeatherData == null) return;
-
-        for (HourData h : currentWeatherData.hourly) {
-            hourlyChartBox.getChildren().add(createHourlyBarNode(h, 28, 140));
-        }
-    }
-
-    private void rebuildHourlyChartDetails() {
-        detailsHourlyChartBox.getChildren().clear();
-        if (currentWeatherData == null) return;
-
-        for (HourData h : currentWeatherData.hourly) {
-            detailsHourlyChartBox.getChildren().add(createHourlyBarNode(h, 34, 170));
-        }
-    }
-
-    private VBox createHourlyBarNode(HourData h, double width, double maxBarHeight) {
-        VBox column = new VBox(6);
-        column.setAlignment(Pos.BOTTOM_CENTER);
-
-        Label t = new Label(formatTemp(h.tempC));
-        t.setTextFill(Color.WHITE);
-        t.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-
-        double normalizedHeight = 45 + Math.min(maxBarHeight - 45, Math.abs(h.tempC) * 3.2);
-        Rectangle bar = new Rectangle(width, normalizedHeight);
-        bar.setArcWidth(12);
-        bar.setArcHeight(12);
-        bar.setFill(new LinearGradient(
-                0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-                new Stop(0, Color.web("#38bdf8")),
-                new Stop(1, Color.web("#6366f1"))
-        ));
-
-        Label hour = new Label(h.hour);
-        hour.setTextFill(Color.web("#dbeafe"));
-        hour.setFont(Font.font("Arial", 12));
-
-        column.getChildren().addAll(t, bar, hour);
-        addHoverEffect(column);
-        return column;
-    }
-
-    private void rebuildForecastDashboard() {
-        forecastContainer.getChildren().clear();
-        if (currentWeatherData == null) return;
-
-        for (ForecastDay f : currentWeatherData.forecast) {
-            forecastContainer.getChildren().add(createForecastRow(f, 320));
-        }
-    }
-
-    private void rebuildForecastDetails() {
-        detailsForecastBox.getChildren().clear();
-        if (currentWeatherData == null) return;
-
-        for (ForecastDay f : currentWeatherData.forecast) {
-            detailsForecastBox.getChildren().add(createForecastRow(f, 700));
-        }
-    }
-
-    private HBox createForecastRow(ForecastDay f, double width) {
-        HBox row = new HBox(15);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(10));
-        row.setMaxWidth(Double.MAX_VALUE);
-        if (width > 0) row.setPrefWidth(width);
-        row.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.10);" +
-                        "-fx-background-radius: 14;"
-        );
-
-        Label day = new Label(f.day);
-        day.setTextFill(Color.WHITE);
-        day.setMinWidth(70);
-        day.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-
-        Label icon = new Label(f.icon);
-        icon.setFont(Font.font("Arial", 22));
-
-        Label cond = new Label(f.condition);
-        cond.setTextFill(Color.web("#dbeafe"));
-        cond.setMinWidth(120);
-
-        Label temp = new Label(formatTemp(f.minC) + " / " + formatTemp(f.maxC));
-        temp.setTextFill(Color.WHITE);
-        temp.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-
-        row.getChildren().addAll(day, icon, cond, temp);
-        addHoverEffect(row);
-        return row;
-    }
-
-    // =========================================================
-    // FAVORITES / HISTORY
-    // =========================================================
-
-    private void addCurrentCityToFavorites() {
-        if (currentWeatherData == null) return;
-        if (favoritesSet.add(currentWeatherData.originalCityName)) {
-            favoritesItems.add(currentWeatherData.originalCityName);
-            refreshFavoritesScene();
-            setLoadingState(false, currentWeatherData.originalCityName + " added to favorites.");
-        } else {
-            setLoadingState(false, currentWeatherData.originalCityName + " is already in favorites.");
-        }
-    }
-
-    private void addToHistory(String cityDisplay) {
-        if (historySet.add(cityDisplay)) {
-            historyItems.add(0, cityDisplay);
-            while (historyItems.size() > 8) {
-                historyItems.remove(historyItems.size() - 1);
-            }
-        } else {
-            historyItems.remove(cityDisplay);
-            historyItems.add(0, cityDisplay);
-        }
-        refreshFavoritesScene();
-    }
-
-    private void refreshFavoritesScene() {
-        if (favoritesCitiesBox == null || historyBox == null) return;
-
-        favoritesCitiesBox.getChildren().clear();
-        historyBox.getChildren().clear();
-
-        if (favoritesItems.isEmpty()) {
-            Label empty = new Label("No favorite cities yet.");
-            empty.setTextFill(Color.web("#dbeafe"));
-            favoritesCitiesBox.getChildren().add(empty);
-        } else {
-            for (String city : favoritesItems) {
-                favoritesCitiesBox.getChildren().add(createCityActionCard(city, true));
-            }
-        }
-
-        if (historyItems.isEmpty()) {
-            Label empty = new Label("No search history yet.");
-            empty.setTextFill(Color.web("#dbeafe"));
-            historyBox.getChildren().add(empty);
-        } else {
-            for (String city : historyItems) {
-                historyBox.getChildren().add(createHistoryCard(city));
-            }
-        }
-    }
-
-    private HBox createCityActionCard(String city, boolean favoriteCard) {
-        HBox row = new HBox(10);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(10));
-        row.setMaxWidth(Double.MAX_VALUE);
-        row.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.10);" +
-                        "-fx-background-radius: 14;"
-        );
-
-        Label name = new Label(city);
-        name.setTextFill(Color.WHITE);
-        name.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        name.setWrapText(true);
-        name.setMaxWidth(Double.MAX_VALUE);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Button open = modernButtonSmall("Load");
-        open.setOnAction(e -> {
-            switchScene(dashboardScene);
-            fetchWeatherForCity(city);
-        });
-
-        row.getChildren().addAll(name, spacer, open);
-
-        if (favoriteCard) {
-            Button remove = modernButtonSmall("Remove");
-            remove.setOnAction(e -> {
-                favoritesSet.remove(city);
-                favoritesItems.remove(city);
-                refreshFavoritesScene();
+            item.setOnMouseClicked(e -> {
+                search.setText(s); 
+                overlayLayer.getChildren().clear(); 
+                fetchWeather(s); 
             });
-            row.getChildren().add(remove);
+
+            box.getChildren().add(item); 
         }
 
-        addHoverEffect(row);
-        return row;
+        overlayLayer.getChildren().setAll(box); 
     }
 
-    private HBox createHistoryCard(String city) {
-        return createCityActionCard(city.contains(",") ? city.substring(0, city.indexOf(',')) : city, false);
-    }
+    // ===== WEATHER =====
 
-    // =========================================================
-    // HELPERS
-    // =========================================================
+    private void fetchWeather(String cityName) {
+        new Thread(() -> {
 
-    private void switchScene(Scene scene) {
-        primaryStage.setScene(scene);
-    }
+            try {
+                currentCity = cityName; 
 
-    private ScrollPane makeResponsiveScroll(Node content) {
-        ScrollPane scrollPane = new ScrollPane(content);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(false);
-        scrollPane.setPannable(true);
-        scrollPane.setStyle(
-                "-fx-background: transparent;" +
-                        "-fx-background-color: transparent;" +
-                        "-fx-padding: 0;"
-        );
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        return scrollPane;
-    }
+                String geo = "https://geocoding-api.open-meteo.com/v1/search?name="
+                        + URLEncoder.encode(cityName, StandardCharsets.UTF_8); 
 
-    private void makeButtonFullWidth(Button btn) {
-        btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setPrefWidth(Region.USE_COMPUTED_SIZE);
-    }
+                String geoJson = client.send(
+                        HttpRequest.newBuilder().uri(URI.create(geo)).build(),
+                        HttpResponse.BodyHandlers.ofString()
+                ).body(); 
 
-    private void bindDashboardPanels(VBox left, VBox center, VBox right) {
-        left.setMinWidth(240);
-        center.setMinWidth(420);
-        right.setMinWidth(300);
+                double lat = extract(geoJson, "latitude"); 
+                double lon = extract(geoJson, "longitude"); 
 
-        left.prefWidthProperty().bind(dashboardLayout.widthProperty().multiply(0.22));
-        center.prefWidthProperty().bind(dashboardLayout.widthProperty().multiply(0.46));
-        right.prefWidthProperty().bind(dashboardLayout.widthProperty().multiply(0.27));
-    }
+                lastLat = lat; 
+                lastLon = lon; 
 
-    private void showSuggestions(List<String> suggestions) {
-        suggestionItems.setAll(suggestions);
-        boolean hasItems = !suggestionItems.isEmpty();
-        suggestionsList.setVisible(hasItems);
-        suggestionsList.setManaged(hasItems);
-    }
+                String api = "https://api.open-meteo.com/v1/forecast?latitude=" + lat +
+                        "&longitude=" + lon +
+                        "&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,surface_pressure,visibility" +
+                        "&timezone=auto";
 
-    private void hideSuggestions() {
-        suggestionItems.clear();
-        suggestionsList.setVisible(false);
-        suggestionsList.setManaged(false);
-    }
+                String json = client.send(
+                        HttpRequest.newBuilder().uri(URI.create(api)).build(),
+                        HttpResponse.BodyHandlers.ofString()
+                ).body(); 
 
-    private void setLoadingState(boolean loading, String text) {
-        statusLabel.setText(text);
-        searchBtn.setDisable(loading);
+                Platform.runLater(() -> updateUI(cityName, json)); 
 
-        if (loadingOverlay != null) {
-            loadingOverlay.setVisible(loading);
-            loadingOverlay.setManaged(loading);
-            loadingLabel.setText(text);
-        }
-    }
-
-    private StackPane createLoadingOverlay() {
-        StackPane overlay = new StackPane();
-        overlay.setVisible(false);
-        overlay.setManaged(false);
-        overlay.setStyle("-fx-background-color: rgba(2,6,23,0.55);");
-
-        VBox box = new VBox(14);
-        box.setAlignment(Pos.CENTER);
-        box.setPadding(new Insets(30));
-        box.setStyle(
-                "-fx-background-color: rgba(15,23,42,0.88);" +
-                        "-fx-background-radius: 20;" +
-                        "-fx-border-color: rgba(255,255,255,0.18);" +
-                        "-fx-border-radius: 20;"
-        );
-
-        Label title = new Label("Loading");
-        title.setTextFill(Color.WHITE);
-        title.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 24));
-
-        loadingLabel = new Label("Fetching live weather...");
-        loadingLabel.setTextFill(Color.web("#dbeafe"));
-        loadingLabel.setFont(Font.font("Arial", 14));
-
-        ProgressBar bar = new ProgressBar();
-        bar.setPrefWidth(250);
-        bar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
-
-        box.getChildren().addAll(title, loadingLabel, bar);
-        overlay.getChildren().add(box);
-        return overlay;
-    }
-
-    private void startClock() {
-        clockTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(0), e -> {
-                    String time = "Local Time: " + LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm:ss a"));
-                    if (timeLabel != null) timeLabel.setText(time);
-
-                    if (currentWeatherData != null && sunProgressBar != null) {
-                        sunProgressBar.setProgress(calculateDayProgress(currentWeatherData.sunrise, currentWeatherData.sunset));
-                    }
-                }),
-                new KeyFrame(Duration.seconds(1))
-        );
-        clockTimeline.setCycleCount(Animation.INDEFINITE);
-        clockTimeline.play();
-    }
-
-    private double calculateDayProgress(String sunrise, String sunset) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
-            LocalTime rise = LocalTime.parse(sunrise, formatter);
-            LocalTime set = LocalTime.parse(sunset, formatter);
-            LocalTime now = LocalTime.now();
-
-            if (now.isBefore(rise)) return 0;
-            if (now.isAfter(set)) return 1;
-
-            long total = java.time.Duration.between(rise, set).toMinutes();
-            long current = java.time.Duration.between(rise, now).toMinutes();
-            return total == 0 ? 0 : (double) current / total;
-        } catch (Exception e) {
-            return 0.5;
-        }
-    }
-
-    private void refreshSceneBackgrounds() {
-        String condition = currentWeatherData == null ? "clear sky" : currentWeatherData.conditionText.toLowerCase(Locale.ROOT);
-        updateSceneBackground(dashboardRoot, dashboardLayout, condition, SceneType.DASHBOARD);
-        updateSceneBackground(detailsRoot, detailsLayout, condition, SceneType.DETAILS);
-        updateSceneBackground(favoritesRoot, favoritesLayout, condition, SceneType.FAVORITES);
-
-        if (loadingOverlay != null && !dashboardRoot.getChildren().contains(loadingOverlay)) {
-            dashboardRoot.getChildren().add(loadingOverlay);
-        }
-    }
-
-    private void updateSceneBackground(StackPane root, BorderPane content, String condition, SceneType sceneType) {
-        if (root == null || content == null) return;
-
-        Color[] colors = getBackgroundColors(condition);
-
-        StackPane bg = new StackPane();
-        bg.setBackground(new Background(new BackgroundFill(
-                new LinearGradient(
-                        0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
-                        new Stop(0, colors[0]),
-                        new Stop(0.5, colors[1]),
-                        new Stop(1, colors[2])
-                ),
-                CornerRadii.EMPTY,
-                Insets.EMPTY
-        )));
-
-        Circle glow1 = new Circle(170, Color.rgb(255, 255, 255, 0.08));
-        Circle glow2 = new Circle(220, Color.rgb(255, 255, 255, 0.06));
-        glow1.setTranslateX(-320);
-        glow1.setTranslateY(-170);
-        glow2.setTranslateX(280);
-        glow2.setTranslateY(180);
-
-        bg.getChildren().addAll(glow1, glow2);
-
-        root.getChildren().setAll(bg, content);
-
-        switch (sceneType) {
-            case DASHBOARD -> {
-                dashboardGlow1 = glow1;
-                dashboardGlow2 = glow2;
-                animateGlowCircles(dashboardGlow1, dashboardGlow2);
+            } catch (Exception e) {
+                e.printStackTrace(); 
             }
-            case DETAILS -> {
-                detailsGlow1 = glow1;
-                detailsGlow2 = glow2;
-                animateGlowCircles(detailsGlow1, detailsGlow2);
-            }
-            case FAVORITES -> {
-                favoritesGlow1 = glow1;
-                favoritesGlow2 = glow2;
-                animateGlowCircles(favoritesGlow1, favoritesGlow2);
-            }
-        }
+
+        }).start();
     }
 
-    private Color[] getBackgroundColors(String condition) {
-        Color c1;
-        Color c2;
-        Color c3;
+    private void updateUI(String name, String json) {
 
-        switch (condition) {
-            case "clear sky", "mainly clear" -> {
-                c1 = darkMode ? Color.web("#0f172a") : Color.web("#dbeafe");
-                c2 = darkMode ? Color.web("#1d4ed8") : Color.web("#93c5fd");
-                c3 = darkMode ? Color.web("#f59e0b") : Color.web("#fde68a");
-            }
-            case "partly cloudy", "cloudy", "overcast", "foggy" -> {
-                c1 = darkMode ? Color.web("#111827") : Color.web("#e5e7eb");
-                c2 = darkMode ? Color.web("#374151") : Color.web("#cbd5e1");
-                c3 = darkMode ? Color.web("#64748b") : Color.web("#94a3b8");
-            }
-            case "rainy", "showers" -> {
-                c1 = darkMode ? Color.web("#082f49") : Color.web("#dbeafe");
-                c2 = darkMode ? Color.web("#0f766e") : Color.web("#7dd3fc");
-                c3 = darkMode ? Color.web("#1d4ed8") : Color.web("#60a5fa");
-            }
-            case "stormy" -> {
-                c1 = darkMode ? Color.web("#020617") : Color.web("#e2e8f0");
-                c2 = darkMode ? Color.web("#312e81") : Color.web("#a5b4fc");
-                c3 = darkMode ? Color.web("#7c3aed") : Color.web("#c4b5fd");
-            }
-            case "snowy" -> {
-                c1 = darkMode ? Color.web("#0f172a") : Color.web("#eff6ff");
-                c2 = darkMode ? Color.web("#334155") : Color.web("#bfdbfe");
-                c3 = darkMode ? Color.web("#94a3b8") : Color.web("#f8fafc");
-            }
-            default -> {
-                c1 = darkMode ? Color.web("#0f172a") : Color.web("#dbeafe");
-                c2 = darkMode ? Color.web("#1e3a8a") : Color.web("#93c5fd");
-                c3 = darkMode ? Color.web("#312e81") : Color.web("#c4b5fd");
-            }
-        }
+        double t = extract(json, "temperature_2m"); 
+        int code = (int) extract(json, "weather_code"); 
 
-        return new Color[]{c1, c2, c3};
+        currentTempC = t; 
+
+        city.setText(name); 
+
+        if (isCelsius)
+            temp.setText(String.format("%.1f°C", t)); 
+        else
+            temp.setText(String.format("%.1f°F", (t * 9 / 5) + 32)); 
+
+        condition.setText(text(code)); 
+        icon.setText(icon(code)); 
+
+        humidity.setText((int) extract(json, "relative_humidity_2m") + "%"); 
+        wind.setText(String.format("%.1f km/h", extract(json, "wind_speed_10m"))); 
+        pressure.setText(String.format("%.0f hPa", extract(json, "surface_pressure"))); 
+        visibility.setText(String.format("%.1f km", extract(json, "visibility") / 1000)); 
     }
 
-    private void animateGlowCircles(Circle glow1, Circle glow2) {
-        if (glow1 == null || glow2 == null) return;
+    // ===== HELPERS =====
 
-        TranslateTransition t1 = new TranslateTransition(Duration.seconds(7), glow1);
-        t1.setFromX(-320);
-        t1.setToX(-220);
-        t1.setAutoReverse(true);
-        t1.setCycleCount(Animation.INDEFINITE);
+    private double extract(String json, String key) {
+        Matcher m = Pattern.compile("\"" + key + "\":\\s*(-?\\d+(\\.\\d+)?)")
+                .matcher(json);
 
-        TranslateTransition t2 = new TranslateTransition(Duration.seconds(8), glow2);
-        t2.setFromX(280);
-        t2.setToX(200);
-        t2.setAutoReverse(true);
-        t2.setCycleCount(Animation.INDEFINITE);
+        if (m.find()) return Double.parseDouble(m.group(1)); 
 
-        t1.play();
-        t2.play();
+        return 0; 
     }
 
-    private void animateWeatherIcon(Label icon) {
-        TranslateTransition floatAnim = new TranslateTransition(Duration.seconds(2), icon);
-        floatAnim.setFromY(0);
-        floatAnim.setToY(-10);
-        floatAnim.setAutoReverse(true);
-        floatAnim.setCycleCount(Animation.INDEFINITE);
-        floatAnim.play();
+    private String text(int c) {
+        if (c == 0) return "Clear Sky"; 
+        if (c <= 3) return "Cloudy"; 
+        if (c < 70) return "Rainy"; 
+        return "Stormy"; 
     }
 
-    private void updateConditionColor(String condition) {
-        if (conditionLabel == null || detailsConditionLabel == null) return;
-
-        Color color;
-        switch (condition.toLowerCase(Locale.ROOT)) {
-            case "clear sky", "mainly clear" -> color = Color.web("#fde68a");
-            case "partly cloudy", "overcast", "cloudy", "foggy" -> color = Color.web("#e5e7eb");
-            case "rainy", "showers" -> color = Color.web("#93c5fd");
-            case "stormy" -> color = Color.web("#c4b5fd");
-            case "snowy" -> color = Color.web("#e0f2fe");
-            default -> color = Color.WHITE;
-        }
-
-        conditionLabel.setTextFill(color);
-        detailsConditionLabel.setTextFill(color);
-    }
-
-    private String formatTemp(double c) {
-        if (isCelsius) return String.format(Locale.US, "%.1f°C", c);
-        double f = (c * 9.0 / 5.0) + 32;
-        return String.format(Locale.US, "%.1f°F", f);
-    }
-
-    private void showInfo(String title, String text) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(text);
-        alert.showAndWait();
-    }
-
-    // =========================================================
-    // STYLING HELPERS
-    // =========================================================
-
-    private VBox glassBox(double width) {
-        VBox box = new VBox();
-        if (width > 0) {
-            box.setPrefWidth(width);
-        }
-        box.setMaxWidth(Double.MAX_VALUE);
-        box.setPadding(new Insets(20));
-        box.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.14);" +
-                        "-fx-background-radius: 24;" +
-                        "-fx-border-color: rgba(255,255,255,0.16);" +
-                        "-fx-border-radius: 24;"
-        );
-
-        DropShadow shadow = new DropShadow();
-        shadow.setRadius(22);
-        shadow.setSpread(0.08);
-        shadow.setColor(Color.rgb(0, 0, 0, 0.3));
-        box.setEffect(shadow);
-
-        return box;
-    }
-
-    private Button modernButton(String text) {
-        Button btn = new Button(text);
-        btn.setPrefWidth(190);
-        btn.setStyle(
-                "-fx-background-color: linear-gradient(to right, #38bdf8, #6366f1);" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 14;" +
-                        "-fx-padding: 10;"
-        );
-        addHoverEffect(btn);
-        return btn;
-    }
-
-    private Button modernButtonSmall(String text) {
-        Button btn = new Button(text);
-        btn.setPrefWidth(120);
-        btn.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.12);" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 13px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 12;" +
-                        "-fx-padding: 8;"
-        );
-        addHoverEffect(btn);
-        return btn;
-    }
-
-    private void styleTextField(TextField tf) {
-        tf.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.16);" +
-                        "-fx-text-fill: white;" +
-                        "-fx-prompt-text-fill: rgba(255,255,255,0.65);" +
-                        "-fx-background-radius: 14;" +
-                        "-fx-border-radius: 14;" +
-                        "-fx-border-color: rgba(255,255,255,0.18);" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-padding: 10;"
-        );
-    }
-
-    private VBox detailCard(String title, Label value) {
-        VBox box = new VBox(8);
-        box.setAlignment(Pos.CENTER);
-        box.setPrefSize(145, 95);
-        box.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.10);" +
-                        "-fx-background-radius: 16;" +
-                        "-fx-border-color: rgba(255,255,255,0.15);" +
-                        "-fx-border-radius: 16;"
-        );
-
-        Label t = new Label(title);
-        t.setTextFill(Color.web("#bfdbfe"));
-        t.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-
-        box.getChildren().addAll(t, value);
-        addHoverEffect(box);
-        return box;
-    }
-
-    private Label detailValueLabel() {
-        Label l = new Label("--");
-        l.setTextFill(Color.WHITE);
-        l.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 15));
-        return l;
-    }
-
-    private void addHoverEffect(Region node) {
-        ScaleTransition in = new ScaleTransition(Duration.millis(150), node);
-        in.setToX(1.04);
-        in.setToY(1.04);
-
-        ScaleTransition out = new ScaleTransition(Duration.millis(150), node);
-        out.setToX(1.0);
-        out.setToY(1.0);
-
-        node.setOnMouseEntered(e -> in.playFromStart());
-        node.setOnMouseExited(e -> out.playFromStart());
-    }
-
-    // =========================================================
-    // WEATHER CODE MAPPING
-    // =========================================================
-
-    private String weatherText(int code) {
-        if (code == 0) return "Clear Sky";
-        if (code == 1) return "Mainly Clear";
-        if (code == 2) return "Partly Cloudy";
-        if (code == 3) return "Overcast";
-        if (code == 45 || code == 48) return "Foggy";
-        if (code >= 51 && code <= 67) return "Rainy";
-        if (code >= 71 && code <= 77) return "Snowy";
-        if (code >= 80 && code <= 82) return "Showers";
-        if (code >= 95) return "Stormy";
-        return "Unknown";
-    }
-
-    private String weatherIcon(int code) {
-        if (code == 0) return "☀";
-        if (code == 1) return "🌤";
-        if (code == 2 || code == 3) return "☁";
-        if (code == 45 || code == 48) return "🌫";
-        if (code >= 51 && code <= 67) return "🌧";
-        if (code >= 71 && code <= 77) return "❄";
-        if (code >= 80 && code <= 82) return "🌦";
-        if (code >= 95) return "⛈";
-        return "⛅";
-    }
-
-    // =========================================================
-    // SIMPLE JSON HELPERS
-    // =========================================================
-
-    private String extractString(String json, String key) {
-        Pattern p = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\"([^\"]*)\"");
-        Matcher m = p.matcher(json);
-        return m.find() ? m.group(1) : null;
-    }
-
-    private double extractDouble(String json, String key) {
-        Pattern p = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*(-?\\d+(?:\\.\\d+)?)");
-        Matcher m = p.matcher(json);
-        return m.find() ? Double.parseDouble(m.group(1)) : 0;
-    }
-
-    private double extractDoubleFromObject(String json, String objectName, String key) {
-        String object = extractObject(json, objectName);
-        return extractDouble(object, key);
-    }
-
-    private List<String> extractStringArrayFromObject(String json, String objectName, String key) {
-        String object = extractObject(json, objectName);
-        String array = extractArrayRaw(object, key);
-        List<String> list = new ArrayList<>();
-        Matcher m = Pattern.compile("\"([^\"]*)\"").matcher(array);
-        while (m.find()) list.add(m.group(1));
-        return list;
-    }
-
-    private List<Double> extractNumberArrayFromObject(String json, String objectName, String key) {
-        String object = extractObject(json, objectName);
-        String array = extractArrayRaw(object, key);
-        List<Double> list = new ArrayList<>();
-        Matcher m = Pattern.compile("-?\\d+(?:\\.\\d+)?").matcher(array);
-        while (m.find()) list.add(Double.parseDouble(m.group()));
-        return list;
-    }
-
-    private String extractObject(String json, String objectName) {
-        Pattern p = Pattern.compile("\"" + Pattern.quote(objectName) + "\"\\s*:\\s*\\{", Pattern.DOTALL);
-        Matcher m = p.matcher(json);
-        if (!m.find()) return "";
-        int start = m.end() - 1;
-        return extractBalanced(json, start, '{', '}');
-    }
-
-    private String extractArrayRaw(String json, String key) {
-        Pattern p = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\\[", Pattern.DOTALL);
-        Matcher m = p.matcher(json);
-        if (!m.find()) return "";
-        int start = m.end() - 1;
-        return extractBalanced(json, start, '[', ']');
-    }
-
-    private String extractBalanced(String text, int start, char open, char close) {
-        int level = 0;
-        for (int i = start; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (c == open) level++;
-            if (c == close) level--;
-            if (level == 0) return text.substring(start, i + 1);
-        }
-        return "";
-    }
-
-    private String extractFirstResultObject(String json) {
-        String resultsArray = extractArrayRaw(json, "results");
-        if (resultsArray.isEmpty()) return "";
-        List<String> objects = splitTopLevelObjects(resultsArray);
-        return objects.isEmpty() ? "" : objects.get(0);
-    }
-
-    private List<String> splitTopLevelObjects(String arrayText) {
-        List<String> objects = new ArrayList<>();
-        int level = 0;
-        int start = -1;
-
-        for (int i = 0; i < arrayText.length(); i++) {
-            char c = arrayText.charAt(i);
-
-            if (c == '{') {
-                if (level == 0) start = i;
-                level++;
-            } else if (c == '}') {
-                level--;
-                if (level == 0 && start != -1) {
-                    objects.add(arrayText.substring(start, i + 1));
-                    start = -1;
-                }
-            }
-        }
-
-        return objects;
-    }
-
-    private String shortTime(String isoDateTime) {
-        if (isoDateTime == null || !isoDateTime.contains("T")) return isoDateTime;
-        return isoDateTime.substring(isoDateTime.indexOf('T') + 1);
-    }
-
-    private String shortHour(String isoDateTime) {
-        if (isoDateTime == null || !isoDateTime.contains("T")) return isoDateTime;
-        String hourPart = isoDateTime.substring(isoDateTime.indexOf('T') + 1);
-        return hourPart.length() >= 5 ? hourPart.substring(0, 5) : hourPart;
-    }
-
-    private String shortDay(String yyyyMmDd) {
-        try {
-            LocalDate d = LocalDate.parse(yyyyMmDd);
-            String s = d.getDayOfWeek().toString();
-            return s.substring(0, 1) + s.substring(1, 3).toLowerCase(Locale.ROOT);
-        } catch (Exception e) {
-            return yyyyMmDd;
-        }
-    }
-
-    // =========================================================
-    // DATA CLASSES
-    // =========================================================
-
-    static class GeoLocation {
-        String name;
-        String country;
-        double latitude;
-        double longitude;
-        String timezone;
-
-        GeoLocation(String name, String country, double latitude, double longitude, String timezone) {
-            this.name = name;
-            this.country = country;
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.timezone = timezone;
-        }
-    }
-
-    static class WeatherResponse {
-        String cityDisplay;
-        String originalCityName;
-        double temperatureC;
-        int humidity;
-        double feelsLikeC;
-        int weatherCode;
-        double pressure;
-        double wind;
-        double visibilityKm;
-        String sunrise;
-        String sunset;
-        String conditionText;
-        String icon;
-        List<HourData> hourly;
-        List<ForecastDay> forecast;
-    }
-
-    static class HourData {
-        String hour;
-        double tempC;
-    }
-
-    static class ForecastDay {
-        String day;
-        String icon;
-        String condition;
-        double minC;
-        double maxC;
-    }
-
-    enum SceneType {
-        DASHBOARD, DETAILS, FAVORITES
+    private String icon(int c) {
+        if (c == 0) return "☀"; 
+        if (c <= 3) return "☁"; 
+        if (c < 70) return "🌧"; 
+        return "⛈"; 
     }
 
     public static void main(String[] args) {
-        launch(args);
+        launch(); 
     }
 }
+```
